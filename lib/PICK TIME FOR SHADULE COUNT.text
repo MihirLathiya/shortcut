@@ -1,0 +1,192 @@
+PICK TIME FOR SHADULE COUNT=======
+
+
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
+  int select = 1;
+  List dateTimes = ['select1'];
+  TextEditingController enter = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      select = 1;
+                    });
+
+                    if (dateTimes.length == 3 && select == 1) {
+                      dateTimes.removeLast();
+                      dateTimes.removeLast();
+                    }
+                    if (dateTimes.length == 2 && select == 1) {
+                      dateTimes.removeLast();
+                    }
+                    log('SELCET1  $dateTimes');
+                  },
+                  child: Text('1'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      select = 2;
+                    });
+
+                    if (dateTimes.length == 1 && select == 2) {
+                      dateTimes.insert(1, 'select2');
+                    }
+
+                    if (dateTimes.length == 3 && select == 2) {
+                      dateTimes.removeLast();
+                    }
+
+                    log('SELCET2  $dateTimes');
+                  },
+                  child: Text('2'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      select = 3;
+                    });
+
+                    if (dateTimes.length == 2 && select == 3) {
+                      dateTimes.insert(2, 'select3');
+                    }
+                    if (dateTimes.length == 1 && select == 3) {
+                      dateTimes.insert(1, 'select2');
+                      dateTimes.insert(2, 'select3');
+                    }
+
+                    log('SELCET3  $dateTimes');
+                  },
+                  child: Text('3'),
+                ),
+              ],
+            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            //   child: TextField(
+            //     controller: enter,
+            //   ),
+            // ),
+            // SizedBox(
+            //   height: 20,
+            // ),
+            // TextButton(
+            //   onPressed: () {
+            //     if (enter.text == '1') {
+            //       select = 1;
+            //
+            //       if (dateTimes.length == 3 && select == 1) {
+            //         dateTimes.removeLast();
+            //         dateTimes.removeLast();
+            //       }
+            //       if (dateTimes.length == 2 && select == 1) {
+            //         dateTimes.removeLast();
+            //       }
+            //     }
+            //     if (enter.text == '2') {
+            //       select = 2;
+            //
+            //       if (dateTimes.length == 1 && select == 2) {
+            //         dateTimes.insert(1, 'select2');
+            //       }
+            //
+            //       if (dateTimes.length == 3 && select == 2) {
+            //         dateTimes.removeLast();
+            //       }
+            //
+            //       log('SELCET2  $dateTimes');
+            //     }
+            //     if (enter.text == '3') {
+            //       select = 3;
+            //
+            //       if (dateTimes.length == 2 && select == 3) {
+            //         dateTimes.insert(2, 'select3');
+            //       }
+            //       if (dateTimes.length == 1 && select == 3) {
+            //         dateTimes.insert(1, 'select2');
+            //         dateTimes.insert(2, 'select3');
+            //       }
+            //
+            //       log('SELCET3  $dateTimes');
+            //     }
+            //     setState(() {});
+            //   },
+            //   child: Text('ADD'),
+            // ),
+            SizedBox(
+              height: 20,
+            ),
+            ...List.generate(
+              dateTimes.length,
+              (index) => InkWell(
+                onTap: () {
+                  pickTime(index);
+                },
+                child: Container(
+                  margin: EdgeInsets.only(bottom: 10),
+                  height: 50,
+                  width: 100,
+                  color: Colors.grey,
+                  alignment: Alignment.center,
+                  child: Text('${dateTimes[index]}'),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (dateTimes.contains('select1') ||
+                    dateTimes.contains('select2') ||
+                    dateTimes.contains('select3')) {
+                  log('Pick Time for Medicine');
+                } else {
+                  log('TOTAL DATE :- ${dateTimes}');
+                }
+              },
+              child: Icon(
+                Icons.list,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  pickTime(index) async {
+    TimeOfDay? pickedTime = await showTimePicker(
+      initialTime: TimeOfDay.now(),
+      context: context,
+    );
+
+    if (pickedTime != null) {
+      var formattedTime = pickedTime.format(context);
+      print('SELECT TIME :- ${formattedTime}');
+      setState(() {
+        dateTimes[index] = formattedTime;
+      });
+    } else {
+      print("Time is not selected");
+    }
+  }
+}

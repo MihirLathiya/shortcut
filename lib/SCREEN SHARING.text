@@ -1,0 +1,556 @@
+SCREEN SHARING=======
+
+import 'dart:io';
+import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'config/agora.config.dart' as config;
+import 'package:agora_rtc_engine/rtc_local_view.dart' as rtc_local_view;
+import 'package:agora_rtc_engine/rtc_remote_view.dart' as rtc_remote_view;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+/// ScreenSharing Example
+class ScreenSharing extends StatefulWidget {
+  const ScreenSharing({Key? key}) : super(key: key);
+
+  @override
+  State<ScreenSharing> createState() => _ScreenSharingState();
+}
+
+class _ScreenSharingState extends State<ScreenSharing> {
+  RtcEngine? _engine;
+  String channelId = config.channelId;
+  bool isJoined = false, screenSharing = false;
+  int _selectedDisplayId = -1;
+  int _selectedWindowId = -1;
+  List<MediaDeviceInfo> recordings = [];
+  String _selectedLoopBackRecordingDeviceName = "";
+  List<int> remoteUid = [];
+  List<Display> displays = [];
+  List<Window> windows = [];
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: channelId);
+    _initEngine();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+    _engine!.destroy();
+  }
+
+  _initEngine() async {
+    _engine = await RtcEngine.createWithContext(RtcEngineContext(config.appId));
+    _addListeners();
+
+    await _engine?.enableVideo();
+    await _engine?.startPreview();
+    await _engine?.setChannelProfile(ChannelProfile.LiveBroadcasting);
+    await _engine?.setClientRole(ClientRole.Broadcaster);
+    await _enumerateDisplayAndWindow();
+    await _enumerateRecording();
+  }
+
+  _addListeners() {
+    _engine?.setEventHandler(RtcEngineEventHandler(
+      warning: (warningCode) {
+        logSink.log('warning $warningCode');
+      },
+      error: (errorCode) {
+        logSink.log('error $errorCode');
+      },
+      joinChannelSuccess: (channel, uid, elapsed) {
+        logSink.log('joinChannelSuccess $channel $uid $elapsed');
+        setState(() {
+          isJoined = true;
+        });
+      },
+      userJoined: (uid, elapsed) {
+        logSink.log('userJoined  $uid $elapsed');
+        if (uid == config.screenSharingUid) {
+          return;
+        }
+        setState(() {
+          remoteUid.add(uid);
+        });
+      },
+      userOffline: (uid, reason) {
+        logSink.log('userOffline  $uid $reason');
+        setState(() {
+          remoteUid.removeWhere((element) => element == uid);
+        });
+      },
+      leaveChannel: (stats) {
+        logSink.log('leaveChannel ${stats.toJson()}');
+        setState(() {
+          isJoined = false;
+          remoteUid.clear();
+        });
+      },
+      localVideoStateChanged:
+          (LocalVideoStreamState localVideoState, LocalVideoStreamError error) {
+        logSink.log(
+            'ScreenSharing localVideoStateChanged $localVideoState $error');
+        if (error == LocalVideoStreamError.ScreenCaptureWindowClosed) {
+          _stopScreenShare();
+        }
+      },
+    ));
+  }
+
+  _joinChannel() async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      await [Permission.microphone, Permission.camera].request();
+    }
+    await _engine?.joinChannel(
+        config.token,
+        _controller.text,
+        null,
+        config.uid,
+        ChannelMediaOptions(
+          publishLocalAudio: true,
+        ));
+  }
+
+  _leaveChannel() async {
+    await _engine?.leaveChannel();
+  }
+
+  Future<void> _enumerateDisplayAndWindow() async {
+    if (!(Platform.isWindows || Platform.isMacOS)) {
+      return;
+    }
+    final windows = _engine?.enumerateWindows();
+    final displays = _engine?.enumerateDisplays();
+    setState(() {
+      this.windows = windows!;
+      this.displays = displays!;
+    });
+  }
+
+  Widget _displayDropDown() {
+    if (displays.isEmpty || !(Platform.isWindows || Platform.isMacOS)) {
+      return Container();
+    }
+    final dropDownMenus = <DropdownMenuItem<int>>[];
+    dropDownMenus.add(const DropdownMenuItem(
+      child: Text('please select display id'),
+      value: -1,
+    ));
+    for (var v in displays) {
+      dropDownMenus.add(DropdownMenuItem(
+        child: Text('Display:${v.id}'),
+        value: v.id,
+      ));
+    }
+    return DropdownButton<int>(
+      items: dropDownMenus,
+      value: _selectedDisplayId,
+      onChanged: (v) {
+        setState(() {
+          _selectedDisplayId = v!;
+          _selectedWindowId = -1;
+        });
+      },
+    );
+  }
+
+  Widget _windowDropDown() {
+    if (windows.isEmpty || !(Platform.isWindows || Platform.isMacOS)) {
+      return Container();
+    }
+    final dropDownMenus = <DropdownMenuItem<int>>[];
+    dropDownMenus.add(const DropdownMenuItem(
+      child: Text('please select window id'),
+      value: -1,
+    ));
+    for (var v in windows) {
+      dropDownMenus.add(DropdownMenuItem(
+        child: Text('Window:${v.id}'),
+        value: v.id,
+      ));
+    }
+    return DropdownButton<int>(
+      items: dropDownMenus,
+      value: _selectedWindowId,
+      onChanged: (v) {
+        setState(() {
+          _selectedWindowId = v!;
+          _selectedDisplayId = -1;
+        });
+      },
+    );
+  }
+
+  Future<void> _enumerateRecording() async {
+    if (!(Platform.isWindows || Platform.isMacOS)) {
+      return;
+    }
+    final recordings =
+        await _engine?.deviceManager.enumerateAudioRecordingDevices();
+
+    setState(() {
+      this.recordings = recordings!;
+    });
+  }
+
+  Widget _loopBackRecordingDropDown() {
+    if (recordings.isEmpty || !(Platform.isWindows || Platform.isMacOS)) {
+      return Container();
+    }
+    final dropDownMenus = <DropdownMenuItem<String>>[];
+    dropDownMenus.add(const DropdownMenuItem(
+      child: Text('select loopBackRecording(Optional)'),
+      value: "",
+    ));
+    for (var v in recordings) {
+      dropDownMenus.add(DropdownMenuItem(
+        child: Text('Window:${v.deviceName}'),
+        value: v.deviceName,
+      ));
+    }
+    return DropdownButton<String>(
+      items: dropDownMenus,
+      value: _selectedLoopBackRecordingDeviceName,
+      onChanged: (v) {
+        setState(() {
+          _selectedLoopBackRecordingDeviceName = v!;
+        });
+      },
+    );
+  }
+
+  _startScreenShare() async {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      const ScreenAudioParameters parametersAudioParams = ScreenAudioParameters(
+        100,
+      );
+      const VideoDimensions videoParamsDimensions = VideoDimensions(
+        width: 1280,
+        height: 720,
+      );
+      const ScreenVideoParameters parametersVideoParams = ScreenVideoParameters(
+        dimensions: videoParamsDimensions,
+        frameRate: 15,
+        bitrate: 1000,
+        contentHint: VideoContentHint.Motion,
+      );
+      const ScreenCaptureParameters2 parameters = ScreenCaptureParameters2(
+        captureAudio: true,
+        audioParams: parametersAudioParams,
+        captureVideo: true,
+        videoParams: parametersVideoParams,
+      );
+
+      await _engine?.startScreenCaptureMobile(parameters);
+    } else if (Platform.isWindows || Platform.isMacOS) {
+      if (_selectedDisplayId != -1) {
+        await _engine?.startScreenCaptureByDisplayId(
+          _selectedDisplayId,
+        );
+        await _engine?.enableAudio();
+        await _engine?.enableLoopbackRecording(true,
+            deviceName: _selectedLoopBackRecordingDeviceName);
+      } else if (_selectedWindowId != -1) {
+        await _engine?.startScreenCaptureByWindowId(_selectedWindowId);
+        await _engine?.enableAudio();
+        await _engine?.enableLoopbackRecording(true,
+            deviceName: _selectedLoopBackRecordingDeviceName);
+      } else {
+        return;
+      }
+    }
+
+    setState(() {
+      screenSharing = true;
+    });
+  }
+
+  _stopScreenShare() async {
+    await _engine?.stopScreenCapture();
+    setState(() {
+      screenSharing = false;
+      _selectedDisplayId = -1;
+      _selectedWindowId = -1;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(hintText: 'Channel ID'),
+                  onChanged: (text) {
+                    setState(() {
+                      channelId = text;
+                    });
+                  },
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: ElevatedButton(
+                        onPressed: isJoined ? leaveChannel : joinChannel,
+                        child: Text('${isJoined ? 'Leave' : 'Join'} channel'),
+                      ),
+                    )
+                  ],
+                ),
+                _displayDropDown(),
+                _windowDropDown(),
+                _loopBackRecordingDropDown(),
+                _renderVideo(),
+              ],
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    onPressed:
+                        screenSharing ? stopScreenShare : startScreenShare,
+                    child: Text('${screenSharing ? 'Stop' : 'Start'} share'),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  _renderVideo() {
+    return Expanded(
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.of(
+                  remoteUid.map(
+                    (e) => SizedBox(
+                      width: 400,
+                      height: 700,
+                      child: kIsWeb
+                          ? rtc_remote_view.SurfaceView(
+                              uid: e,
+                              channelId: channelId,
+                            )
+                          : rtc_remote_view.TextureView(
+                              uid: e,
+                              channelId: channelId,
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+/// [AppBar] action that shows a [Overlay] with log.
+class LogActionWidget extends StatefulWidget {
+  /// Construct the [LogActionWidget]
+  const LogActionWidget({Key? key}) : super(key: key);
+
+  @override
+  LogActionWidgetState createState() => LogActionWidgetState();
+}
+
+class _LogActionWidgetState extends State<LogActionWidget> {
+  bool _isOverlayShowed = false;
+
+  OverlayEntry? _overlayEntry;
+
+  @override
+  void dispose() {
+    _removeOverlay();
+
+    super.dispose();
+  }
+
+  void _removeOverlay() {
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+        onPressed: () {
+          if (_isOverlayShowed) {
+            _removeOverlay();
+          } else {
+            _overlayEntry = OverlayEntry(builder: (c) {
+              return Positioned(
+                left: 0,
+                top: 0,
+                height: MediaQuery.of(context).size.height * 0.5,
+                width: MediaQuery.of(context).size.width,
+                child: Container(
+                  color: Colors.black87,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  logSink.clear();
+                                },
+                                child: const Text(
+                                  'Clear log',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: IconButton(
+                                      color: Colors.transparent,
+                                      onPressed: () {
+                                        _removeOverlay();
+                                        isOverlayShowed = !isOverlayShowed;
+                                      },
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                      )),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Expanded(
+                            child: SingleChildScrollView(
+                              child: LogWidget(),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            });
+            Overlay.of(context)?.insert(_overlayEntry!);
+          }
+          isOverlayShowed = !isOverlayShowed;
+          // setState(() {
+
+          // });
+        },
+        child: const Text(
+          'Log',
+          style: TextStyle(color: Colors.white),
+        ));
+  }
+}
+
+/// LogWidget
+class LogWidget extends StatefulWidget {
+  /// Construct the [LogWidget]
+  const LogWidget({
+    Key? key,
+    this.logSink,
+    this.textStyle = const TextStyle(fontSize: 15, color: Colors.white),
+  }) : super(key: key);
+
+  /// This [LogSink] is used to add log.
+  final LogSink? logSink;
+
+  /// The text style of the log.
+  final TextStyle textStyle;
+
+  @override
+  LogWidgetState createState() => LogWidgetState();
+}
+
+class _LogWidgetState extends State<LogWidget> {
+  VoidCallback? _listener;
+  late final LogSink _logSink;
+
+  @override
+  void initState() {
+    super.initState();
+
+    logSink = widget.logSink ?? defaultLogSink;
+
+    _listener ??= () {
+      setState(() {});
+    };
+
+    _logSink.addListener(_listener!);
+  }
+
+  @override
+  void dispose() {
+    if (_listener != null) {
+      _logSink.removeListener(_listener!);
+      _listener = null;
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _logSink.output(),
+      style: widget.textStyle,
+    );
+  }
+}
+
+/// Class that add and update the log in [LogActionWidget]
+class LogSink extends ChangeNotifier {
+  final StringBuffer _stringBuffer = StringBuffer();
+
+  /// Add log to [LogActionWidget]
+  void log(String log) {
+    _stringBuffer.writeln(log);
+    notifyListeners();
+  }
+
+  /// Get all logs
+  String output() {
+    return _stringBuffer.toString();
+  }
+
+  /// Clear logs
+  void clear() {
+    _stringBuffer.clear();
+    notifyListeners();
+  }
+}
+
+final LogSink _defaultLogSink = LogSink();
+
+/// The global [LogSink]
+LogSink get logSink => _defaultLogSink;

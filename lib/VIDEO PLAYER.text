@@ -1,0 +1,252 @@
+VIDEO PLAYER =========
+
+import 'dart:async';
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:video_player/video_player.dart';
+
+class VideoPlayerScreen extends StatefulWidget {
+  const VideoPlayerScreen({Key? key}) : super(key: key);
+
+  @override
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+}
+
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  TextEditingController link = TextEditingController();
+  bool isAdd = false;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: link,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (link.text.isNotEmpty) {
+                        setState(() {
+                          isAdd = true;
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Enter Link'),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text('Go'),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            if (isAdd == true) VideoScreen(link: '${link.text.toString()}'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class VideoScreen extends StatefulWidget {
+  final link;
+  const VideoScreen({Key? key, this.link}) : super(key: key);
+
+  @override
+  State<VideoScreen> createState() => _VideoScreenState();
+}
+
+class _VideoScreenState extends State<VideoScreen> {
+  TimerController timerController = Get.put(TimerController());
+  @override
+  void initState() {
+    timerController.initializeController(link: widget.link);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    timerController.controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    log('BUID REFRESH');
+    return GetBuilder<TimerController>(
+      builder: (timerControllers) {
+        return Column(
+          children: [
+            Container(
+              height: 200,
+              width: 400,
+              child: timerControllers.controller.value.isInitialized
+                  ? VideoPlayer(timerControllers.controller)
+                  : Container(),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${timerControllers.controller.value.position.toString().split('.').first}',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  Text(
+                    '${timerControllers.controller.value.duration.toString().split('.').first}',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            VideoProgressIndicator(
+              timerControllers.controller,
+              allowScrubbing: true,
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              colors: VideoProgressColors(
+                backgroundColor: Colors.grey,
+                playedColor: Colors.green,
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    timerControllers.controller.setPlaybackSpeed(1);
+                  },
+                  child: Text('Normal'),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                TextButton(
+                  onPressed: () {
+                    timerControllers.controller.setPlaybackSpeed(2);
+                  },
+                  child: Text('2X'),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                TextButton(
+                  onPressed: () {
+                    timerControllers.controller.setPlaybackSpeed(4);
+                  },
+                  child: Text('4X'),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    if (timerControllers.controller.value.position.inSeconds >
+                        10) {
+                      timerControllers.backWord();
+                    }
+                  },
+                  icon: Icon(
+                    Icons.skip_previous,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                IconButton(
+                  onPressed: () {
+                    timerControllers.togglePlayPause();
+                    if (timerControllers.isPlay == true) {
+                      timerControllers.controller.play();
+                    } else {
+                      timerControllers.controller.pause();
+                    }
+                  },
+                  icon: Icon(
+                    timerControllers.isPlay == false
+                        ? Icons.play_arrow
+                        : Icons.pause,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                IconButton(
+                  onPressed: () async {
+                    timerControllers.forWord();
+                  },
+                  icon: Icon(
+                    Icons.skip_next,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            )
+          ],
+        );
+      },
+    );
+  }
+}
+
+class TimerController extends GetxController {
+  late VideoPlayerController controller;
+
+  bool isPlay = false;
+
+  initializeController({String? link}) {
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      update();
+    });
+    controller = VideoPlayerController.network('${link}')
+      ..initialize().then((_) {
+        update();
+      });
+    update();
+  }
+
+  togglePlayPause() {
+    isPlay = !isPlay;
+  }
+
+  forWord() async {
+    await controller.seekTo(
+      Duration(seconds: controller.value.position.inSeconds + 10),
+    );
+    update();
+  }
+
+  backWord() async {
+    await controller.seekTo(
+      Duration(seconds: controller.value.position.inSeconds - 10),
+    );
+  }
+}

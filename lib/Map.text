@@ -1,0 +1,125 @@
+HOW TO FIND ADDRESS USING LAT & LONG =+++++
+
+ String address= '';
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, long);
+      print(placemarks);
+      Placemark place = placemarks[0];
+      address =
+          '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+      print("ppppppp${address}");
+
+
+
+
+
+
+HOW TO GET CURRENT LOCATION ========
+
+
+  late bool serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  LocationData? userLocation;
+
+  Future<void> getUserLocation() async {
+    Location location = Location();
+
+    // Check if location service is enable
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    // Check if permission is granted
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    final locationData = await location.getLocation();
+    setState(() {
+      userLocation = locationData;
+      print('LATTITUDE1${userLocation!.latitude}');
+      print('Longitide1${userLocation!.longitude}');
+      print('userId${PreferenceManager.getUserId()}');
+    });
+
+    locationViewModel.locationViewModel(model: {
+      "user_id": PreferenceManager.getUserId(),
+      "lattitude": userLocation!.latitude.toString(),
+      "longitude": userLocation!.longitude.toString(),
+    });
+
+    // LocationResponseModel responseModel = locationViewModel.apiResponse.data;
+    // if (responseModel.status == Status.COMPLETE) {
+    print('LATTITUDE${userLocation!.latitude}');
+    print('Longitide${userLocation!.longitude}');
+    // } else {
+    print('ERROR');
+    // }
+  }
+
+
+
+MANIFIEST==========
+location: ^4.4.0
+
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    HOW TO FINDE CURRENT USER LOCATION========
+
+    Android Manifiest:-
+
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    Package:-
+
+      geocoding: ^2.0.5
+      geolocator: ^9.0.1
+
+
+    Code:-
+
+      Position? _currentPosition;
+
+    if (_currentPosition != null)
+                  Text(
+                      "LAT: ${_currentPosition!.latitude}, LNG: ${_currentPosition!.longitude}"),
+
+      _getCurrentLocation() {
+        Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.best,
+                forceAndroidLocationManager: true)
+            .then((Position position) {
+          setState(() {
+            _currentPosition = position;
+          });
+        }).catchError((e) {
+          print(e);
+        });
+      }

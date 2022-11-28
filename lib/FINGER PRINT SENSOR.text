@@ -1,0 +1,124 @@
+FINGER PRINT SENSOR +=======================
+
+local_auth: ^2.1.2
+<uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+
+
+ADD This app/src/main/kotlin/com/hotlinecafee   =====>>>>
+
+import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.plugins.GeneratedPluginRegistrant
+import io.flutter.embedding.engine.FlutterEngine
+import androidx.annotation.NonNull;
+
+class MainActivity: FlutterFragmentActivity() {
+    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        GeneratedPluginRegistrant.registerWith(flutterEngine);
+    }
+}
+
+
+
+
+
+
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
+
+class AuthApp extends StatefulWidget {
+  @override
+  AuthAppState createState() => AuthAppState();
+}
+
+class _AuthAppState extends State<AuthApp> {
+  LocalAuthentication auth = LocalAuthentication();
+  bool? _canCheckBiometric;
+  List<BiometricType>? _availableBiometric;
+  String authorized = "Not authorized";
+
+  //checking biometrics
+  //this function will check the sensors and will tell us
+  // if we can use them or not
+  Future<void> _checkBiometric() async {
+    bool? canCheckBiometric;
+    try {
+      canCheckBiometric = await auth.canCheckBiometrics;
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _canCheckBiometric = canCheckBiometric;
+    });
+  }
+
+  //this function will get all the available biometrics inside our device
+  //it will return a list of objects, but for our example it will only
+  //return the fingerprint biometric
+  Future<void> _getAvailableBiometrics() async {
+    List<BiometricType>? availableBiometric;
+    try {
+      availableBiometric = await auth.getAvailableBiometrics();
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _availableBiometric = availableBiometric;
+    });
+  }
+
+  //this function will open an authentication dialog
+  // and it will check if we are authenticated or not
+  // so we will add the major action here like moving to another activity
+  // or just display a text that will tell us that we are authenticated
+  Future<void> _authenticate() async {
+    bool authenticated = false;
+    try {
+      authenticated = await auth.authenticate(
+        localizedReason: "Scan your finger print to authenticate",
+      );
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    if (!mounted) return;
+
+    setState(() {
+      authorized =
+          authenticated ? "Authorized success" : "Failed to authenticate";
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometric();
+    _getAvailableBiometrics();
+    _authenticate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: <Widget>[
+            // Center(
+            //   child: ElevatedButton(
+            //     onPressed: _authenticate,
+            //     child: Text("Get Biometric"),
+            //   ),
+            // ),
+            Text("Can check biometric: $_canCheckBiometric"),
+            Text("Available biometric: $_availableBiometric"),
+            Text("Current State: $authorized"),
+          ],
+        ),
+      ),
+    );
+  }
+}

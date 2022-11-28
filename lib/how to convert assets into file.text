@@ -1,0 +1,25 @@
+how to convert assets into file=================
+  Future getImageFileFromAssets(String path) async {
+    var fileName = '$path';
+
+    ByteData byteData = await rootBundle.load(fileName);
+    Uint8List rawData = byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+    Uint8List imageUint8List = rawData;
+
+    final tempDir = await getTemporaryDirectory();
+
+    File file = await File('${tempDir.path}/${DateTime.now()}').create();
+    file.writeAsBytesSync(imageUint8List);
+    print('FILE++++>>>>$file');
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          height: 200,
+          width: 200,
+          child: Image.file(file),
+        );
+      },
+    );
+  }

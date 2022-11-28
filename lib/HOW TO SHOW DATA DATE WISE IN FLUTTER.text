@@ -1,0 +1,138 @@
+HOW TO SHOW DATA DATE WISE IN FLUTTER =====================================
+
+
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:hotlinecafee/Preference/preference.dart';
+import 'package:hotlinecafee/common/chat_commons.dart';
+import 'package:hotlinecafee/common/loading.dart';
+
+class ChatRoomScreen extends StatefulWidget {
+  final name;
+  final userId;
+  final userImage;
+  final chatRoomId;
+
+  const ChatRoomScreen({
+    Key? key,
+    this.name,
+    this.userImage,
+    this.chatRoomId,
+    this.userId,
+  }) : super(key: key);
+
+  @override
+  State<ChatRoomScreen> createState() => _ChatRoomScreenState();
+}
+
+class _ChatRoomScreenState extends State<ChatRoomScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xff1E1E1E),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder(
+              stream: firebaseFirestore
+                  .collection('chatroom')
+                  .doc(widget.chatRoomId)
+                  .collection('chat')
+                  .orderBy('time', descending: true)
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                dateData!.clear();
+
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: snapshot.data!.docs.length,
+                    reverse: true,
+                    itemBuilder: (context, index) {
+                      var message = snapshot.data!.docs[index];
+                      var myDateTime;
+                      var myDateTime2;
+                      var time1;
+                      var time2;
+
+                      try {
+                        time1 = snapshot.data!.docs[index]['time'];
+
+                        /// TIME STAMP FIREBASE
+                        try {
+                          time2 = snapshot.data!.docs[index + 1]['time'];
+
+                          /// TIME STAMP FIREBASE
+                        } catch (e) {}
+                        myDateTime = time1
+                            .toDate()
+                            .toString()
+                            .split(' ')
+                            .first
+                            .toString();
+
+                        /// 2022-09-9  DATE TIME SPLIT TO DATE
+                        try {
+                          myDateTime2 = time2
+                              .toDate()
+                              .toString()
+                              .split(' ')
+                              .first
+                              .toString();
+
+                          /// 2022-09-9  DATE TIME SPLIT TO DATE
+                        } catch (e) {}
+
+                        // myDateTime = time1.toDate().toString().split(' ')[0];
+                        // myDateTime2 = time2.toDate().toString().split(' ')[0];
+                      } catch (e) {
+                        log('DATE EERROE');
+                      }
+
+                      // log('message $myDateTime');
+                      Widget seprate = SizedBox();
+
+                      try {
+                        log('===TIME=== $index $myDateTime');
+                        log('===TIME2=== ${myDateTime2 == myDateTime}');
+                        if (index != 0 && myDateTime != myDateTime2) {
+                          seprate = Container(
+                            color: Colors.white,
+                            child: Text('$myDateTime'),
+                          );
+                        }
+                      } catch (e) {
+                        seprate = SizedBox();
+                        log('TIME EERROE');
+                      }
+
+                      return Column(
+                        children: [
+                          seprate,
+
+                          /// aapdo widget
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

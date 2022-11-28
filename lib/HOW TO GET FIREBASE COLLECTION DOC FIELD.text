@@ -1,0 +1,39 @@
+HOW TO GET FIREBASE COLLECTION DOC FIELD :-
+
+//   Future<String?> getRandomMatchId(id) async {
+//     String? channelId;
+//
+//     var data = await firebaseFirestore.collection('user').doc(id).get();
+//     Map<String, dynamic>? userData = data.data();
+//
+//     setState(() {
+//       channelId = userData!['id'];
+//     });
+//
+//     print('OTHER USER ID :- $channelId');
+//     return channelId;
+//   }
+
+
+
+
+                        (   2   )
+
+
+
+//   getId<String>() async {
+//     CollectionReference _collectionRef =
+//     FirebaseFirestore.instance.collection('random');
+//
+//     QuerySnapshot querySnapshot = await _collectionRef.get();
+//
+//     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+//     print('ALL DOCS IDS :- ${allData}');
+//     print(
+//         'ALL DOCS IDS :- ${allData[Random().nextInt(allData.length)].runtimeType}');
+//     final _resultList = Map<String, dynamic>.from(
+//         allData[Random().nextInt(allData.length)] as LinkedHashMap);
+//
+//     print('ALL DOCS IDS :- ${_resultList['id']}');
+//     return _resultList['id'];
+//   }
