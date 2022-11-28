@@ -1,0 +1,36 @@
+SHA 256 :  D2:DA:A0:B9:53:A7:C0:5C:0B:8C:63:8C:C9:95:76:66:F0:10:17:9F:79:61:B3:11:EB:7D:DA:86:12:30:B3:52
+
+SHA 1 :  3A:5A:0B:85:11:38:90:A5:E8:31:98:C3:23:79:BD:01:AE:02:CB:2E
+
+
+
+MacOs :=
+
+SHA1 := C4:89:D2:C7:62:4F:73:5E:AE:4B:31:CC:55:06:E4:BE:45:A6:19:4B
+SHA256 := 1F:66:4B:16:C1:8C:45:76:96:78:F4:77:6E:D8:E4:51:45:BE:23:75:68:ED:A3:AD:82:99:2B:0A:AB:F9:6D:13
+
+
+
+
+getKey SHA5 MacOs command :=
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+
+
+
+
+Reduce app size command := 
+
+flutter build apk --target-platform android-arm,android-arm64,android-x64 --split-per-abi.   := Kevin
+
+flutter build apk --split-per-abi --no-sound-null-safety  := Hardip
+
+
+
+web app command : flutter create --org com.domain appname
+
+apikey = 563492ad6f91700001000001aafcec6613774648b8f96de7cf39f2c1
+
+api = https://api.pexels.com/v1/curated?per_page=30&page=30%22
+
+
+

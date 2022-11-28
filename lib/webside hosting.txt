@@ -1,0 +1,17 @@
+(1) create web folder using =======>>>>>>>   flutter create .
+(2) login with firebase using ========>>>>>  firebase login
+(3) use this cmd for nodjs ====>>>>           npm install -g firebase-tools@11.13.0
+(4) Go to this dir === C:\Users\Nevilrv\AppData\Roaming\npm=== and delete firebase folder
+(5) after use this  =======>>>>>>>    firebase init
+(6)  Are you ready to proceed? (Y/n)  =====>>>>> y
+(7) choose == Hosting: Configure files for Firebase Hosting and (optionally) set up GitHub Action deploys ==  for choose press spacebar after enter
+(8)  Use an existing project 
+(9) choos firebase project 
+(10) What do you want to use as your public directory? (public) build/web
+(11)   Configure as a single-page app (rewrite all urls to /index.html)? (y/N) ===  y
+(12)  Set up automatic builds and deploys with GitHub? (y/N) ===  n
+(13) then build web using this   =====>>>>>>>>     flutter build web
+(14) then deploy using this ====>>>>    firebase deploy --only hosting
+
+
+

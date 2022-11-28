@@ -1,0 +1,78 @@
+
+  String? uploadedPhotoUrl;
+  var pickedFile;
+
+  chooseImage() async {
+    pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    // pickedFile = await ImagePickerWeb.getImageAsBytes();
+    pickedFileBytes = await pickedFile!.readAsBytes();
+    setState(() {
+      _file = File("a");
+      webImage = pickedFileBytes!;
+    });
+    uploadImageToStorage(pickedFile);
+  }
+
+  uploadImageToStorage(var pickedFile) async {
+    if (kIsWeb) {
+      Reference _reference = FirebaseStorage.instance
+          .ref()
+          .child('images/${Path.basename(pickedFile!.path)}');
+      await _reference
+          .putData(
+        await pickedFile!.readAsBytes(),
+        SettableMetadata(contentType: 'image/jpeg'),
+      )
+          .whenComplete(() async {
+        await _reference.getDownloadURL().then((value) {
+          uploadedPhotoUrl = value;
+          print('uploadedPhotoUrl--------${uploadedPhotoUrl}');
+        });
+      });
+    } else {
+//write a code for android or ios
+    }
+  }
+
+
+
+       GestureDetector(
+                                        onTap: () {
+                                          // uploadImage();
+                                          chooseImage();
+                                          setState(() {
+                                            showButton = true;
+                                          });
+                                        },
+                                        child: Container(
+                                            height: 100,
+                                            width: 100,
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey,
+                                              borderRadius:
+                                                  BorderRadius.circular(15.h),
+                                            ),
+                                            child: (_file.path == "zz")
+                                                ? Icon(Icons.add)
+                                                : kIsWeb
+                                                    ? ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.h),
+                                                        child: Image.memory(
+                                                          webImage,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )
+                                                    : ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.h),
+                                                        child: Image.file(
+                                                          _file,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )),
+                                      ),

@@ -1,0 +1,313 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:sizer/sizer.dart';
+import 'package:st_store_ecommerce/Common_Widget/Common_Button.dart';
+import 'package:st_store_ecommerce/views/SignIn_Screen.dart';
+
+import '../Common_Widget/Common_TextField.dart';
+import '../controller/network_checker_controller.dart';
+
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
+
+  @override
+  SignUpScreenState createState() => SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _key = GlobalKey<FormState>();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  bool icon1 = false;
+  bool cBox = false;
+  ConnectivityProvider _connectivityProvider = Get.put(ConnectivityProvider());
+  @override
+  void initState() {
+    _connectivityProvider.startMonitoring();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GetBuilder<ConnectivityProvider>(
+        builder: (controller) {
+          if (controller.isOnline!) {
+            return SafeArea(
+              child: Form(
+                key: _key,
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              color: Colors.black,
+                            ),
+                            Text(
+                              'Perth, Western Australia',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 40.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: Text(
+                          'Getting Started',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      SizedBox(height: 10.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: Text(
+                          'Create an account to continue!',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: Text(
+                          'Email',
+                          style: TextStyle(
+                              color: Color(0xff8F92A1),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: CommonTextField(
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'enter the Email';
+                            } else {
+                              return null;
+                            }
+                          },
+                          controller: emailController,
+                          hint: 'Email',
+                          icon: Icons.email,
+                        ),
+                      ),
+                      SizedBox(height: 20.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: Text(
+                          'Username',
+                          style: TextStyle(
+                              color: Color(0xff8F92A1),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: CommonTextField(
+                          controller: userNameController,
+                          hint: 'UserName',
+                          icon: Icons.people,
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'enter the UserName';
+                            } else {
+                              return null;
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 20.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: Text(
+                          'Password',
+                          style: TextStyle(
+                              color: Color(0xff8F92A1),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: CommonTextField(
+                          controller: passwordController,
+                          hint: 'Password',
+                          icon: Icons.lock,
+                          icons: Icons.remove_red_eye_rounded,
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'enter the password';
+                            } else if (value.length < 6) {
+                              return 'required 6 character';
+                            } else {
+                              return null;
+                            }
+                          },
+                          //obText: true,
+                        ),
+                      ),
+                      SizedBox(height: 10.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                                value: cBox,
+                                onChanged: (value) {
+                                  setState(() {
+                                    cBox = value!;
+                                    print('${value}');
+                                  });
+                                }),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'By creating an account, you agree to our',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                Text(
+                                  'Term & Conditions',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20.sp),
+                      SizedBox(height: 20.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: CommonButton(
+                            name: 'SIGN UP',
+                            onPressed: () {
+                              if (_key.currentState!.validate()) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SignInScreen(),
+                                    ));
+                              }
+                            },
+                            image: 'assets/images/arrow-long-right.png'),
+                      ),
+                      SizedBox(height: 20.sp),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account?",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SignInScreen()),
+                              );
+                              print('sign in');
+                            },
+                            child: Text(
+                              ' Sign in',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.sp),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.sp),
+                        child: MaterialButton(
+                          onPressed: () {
+                            if (_key.currentState!.validate()) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SignInScreen(),
+                                  ));
+                            }
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          color: Color(0xff3C79E6),
+                          height: 44.sp,
+                          minWidth: 305.sp,
+                          child: Row(
+                            children: [
+                              Image(
+                                image: AssetImage('assets/images/facebook.png'),
+                              ),
+                              SizedBox(width: 30.sp),
+                              Text(
+                                'Connect with Facebook',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          } else {
+            return Center(
+              child: Container(
+                height: double.infinity,
+                width: double.infinity,
+                color: Colors.white,
+                child: Center(
+                  child: Text(
+                    "Please check your internet connection",
+                    textScaleFactor: 1,
+                  ),
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+}

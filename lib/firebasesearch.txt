@@ -1,0 +1,19 @@
+/// DECALARE THIS TWO BEFORE BUILD
+TextEditingController search = TextEditingController();
+String searchText = " " ;
+
+ /// DECALARE THIS SNAPSHOT.HASHDATA AFTER
+List<DocumentSnapshot> info =
+                                            snapshot.data!.docs;
+                                        print("length======>${info.length}");
+                                        print("Text======>${searchText}");
+                                        if (searchText.isNotEmpty) {
+                                          info = info.where((element) {
+                                            return element
+                                                .get('prdName')
+                                                .toString()
+                                                .toLowerCase()
+                                                .contains(
+                                                    searchText.toLowerCase());
+                                          }).toList();
+                                        }
