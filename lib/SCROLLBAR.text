@@ -1,0 +1,136 @@
+class HomeScreen extends StatelessWidget {
+  HomeScreen({Key? key}) : super(key: key);
+
+  final List<String> images = [
+    'https://images.unsplash.com/photo-1666688832727-0f5dfb2b50c4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTZ8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664902276790-90624a60ff47?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8Nnx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664949696366-99e1f0fcd347?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8NXx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664899727906-3445a0cd138e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8OXx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664763961523-874b9385d916?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8N3x8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664885812663-11bfdfce4e59?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTJ8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664820965487-2c81f58083c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664891399651-bccb92f27f25?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MjB8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664893772672-05c28e99dfd3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTl8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664894214641-147ee5721424?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTh8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://media.istockphoto.com/id/1368368019/photo/astronaut-standing-on-the-moon-looking-towards-a-distant-earth.jpg?b=1&s=170667a&w=0&k=20&c=mTyqDnqPuPzfwm8E8RMQrFmHVpsuD23ZwxMQfsqVNZ0=',
+    'https://images.unsplash.com/photo-1664938731555-f22d3ddda0b0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664902276790-90624a60ff47?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8Nnx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664949696366-99e1f0fcd347?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8NXx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664899727906-3445a0cd138e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8OXx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664763961523-874b9385d916?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8N3x8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664885812663-11bfdfce4e59?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTJ8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664820965487-2c81f58083c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664891399651-bccb92f27f25?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MjB8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664893772672-05c28e99dfd3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTl8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://images.unsplash.com/photo-1664894214641-147ee5721424?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTh8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    'https://media.istockphoto.com/id/1368368019/photo/astronaut-standing-on-the-moon-looking-towards-a-distant-earth.jpg?b=1&s=170667a&w=0&k=20&c=mTyqDnqPuPzfwm8E8RMQrFmHVpsuD23ZwxMQfsqVNZ0=',
+  ];
+
+  final ScrollController _controller =
+      ScrollController(initialScrollOffset: 1000);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Scrollbar(
+        controller: _controller,
+        scrollbarOrientation: ScrollbarOrientation.left,
+        thickness: 50,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          controller: _controller,
+          child: Column(
+            children: [
+              PaginatedDataTable(
+                columns: const [
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                  DataColumn(label: Text('helllo')),
+                ],
+                source: TableRow(),
+              ),
+              Container(
+                height: 900,
+                color: Colors.red,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TableRow extends DataTableSource {
+  @override
+  DataRow? getRow(int index) {
+    return DataRow.byIndex(index: index, cells: [
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+      DataCell(Text("Cell $index")),
+    ]);
+  }
+
+  @override
+  bool get isRowCountApproximate => true;
+
+  @override
+  int get rowCount => 50;
+
+  @override
+  int get selectedRowCount => 0;
+}
