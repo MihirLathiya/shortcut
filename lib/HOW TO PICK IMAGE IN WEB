@@ -1,0 +1,45 @@
+ var pickedFile;
+  String? fileName;
+  File _file = File("zz");
+  Uint8List? pickedFileBytes;
+  Uint8List webImage = Uint8List(10);
+  ImagePicker imagePicker = ImagePicker();
+
+  pickVideo() async {
+    pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    pickedFileBytes = await pickedFile!.readAsBytes();
+    setState(() {
+      _file = File("a");
+      webImage = pickedFileBytes!;
+    });
+  }
+  
+  CONDITION    ++++++++++++>>>>>>>>>>>>
+  
+   (_file.path == "zz")
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.image,
+                                        color: AppColor.mainColor,
+                                      ),
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text(
+                                        'Add video',
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          color: AppColor.mainColor,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                : Image.memory(
+                                    webImage,
+                                    fit: BoxFit.cover,
+                                  )
