@@ -1,13 +1,44 @@
   List images1 = [];
-  getPath() async {
-    final manifestJson =
-        await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
-    final images = json
-        .decode(manifestJson)
-        .keys
-        .where((String key) => key.startsWith('assets/images/'));
-    log('images :- ${images.toString().split('(').last.split(')').first}');
 
-    images1 = images.toString().split('(').last.split(')');
-    log('ALL IMAGES :- $images1');
+  Future _initImages() async {
+    // >> To get paths you need these 2 lines
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    // >> To get paths you need these 2 lines
+
+    final imagePaths = manifestMap.keys
+        .where((String key) => key.contains('assets/foot'))
+        .toList();
+
+    setState(() {
+      imagePaths
+          .toString()
+          .replaceFirst('[', '')
+          .replaceAll(']', '')
+          .replaceAll('%20', ' ')
+          .split(',')
+          .forEach((element) {
+        images1.add(element.toString());
+      });
+      log('TOTAL IMAGES :- ${images1.length}');
+      log('TOTAL IMAGES :- ${images1}');
+    });
   }
+  
+  
+  
+  VIEW ------------------
+  
+  
+  
+  ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: images1.length,
+                  itemBuilder: (context, index) {
+                    log('IMAGE$index :- ${images1[index]}');
+                    return Image.asset(
+                        '${images1[index].toString().trim().toString()}');
+                  },
+                ),
