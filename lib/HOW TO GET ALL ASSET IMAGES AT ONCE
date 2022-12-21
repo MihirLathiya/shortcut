@@ -1,0 +1,13 @@
+  List images1 = [];
+  getPath() async {
+    final manifestJson =
+        await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
+    final images = json
+        .decode(manifestJson)
+        .keys
+        .where((String key) => key.startsWith('assets/images/'));
+    log('images :- ${images.toString().split('(').last.split(')').first}');
+
+    images1 = images.toString().split('(').last.split(')');
+    log('ALL IMAGES :- $images1');
+  }
