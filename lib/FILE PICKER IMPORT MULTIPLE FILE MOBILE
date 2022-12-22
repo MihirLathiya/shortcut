@@ -1,0 +1,160 @@
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+class FilePickerDemo extends StatefulWidget {
+  const FilePickerDemo({Key? key}) : super(key: key);
+
+  @override
+  State<FilePickerDemo> createState() => _FilePickerDemoState();
+}
+
+class _FilePickerDemoState extends State<FilePickerDemo> {
+  int selectFile = -1;
+  FilePickerResult? result;
+  List pickedFile = ['', '', '', '', '', ''];
+
+  pickedFileFunction() async {
+    result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null) {
+      File file = File(result!.files.single.path!);
+
+      pickedFile.removeAt(selectFile);
+      pickedFile.insert(selectFile, file.path);
+      log('FILES :- ${file.path}');
+      log('SELECTED FILES :- $pickedFile');
+      setState(() {});
+    } else {
+      log('Something went wrong');
+    }
+  }
+
+  List images1 = [];
+
+  initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // if (pickedFile[selectFile] != null) {
+                    if (selectFile < 4) {
+                      pickedFileFunction();
+
+                      setState(
+                        () {
+                          selectFile += 1;
+                        },
+                      );
+                    } else {
+                      log('SELECTED FILE INDEX :-');
+                    }
+
+                    log('SELECTED FILE INDEX :- $selectFile');
+                    // }
+                  },
+                  child: Text('Select'),
+                ),
+                ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: 5,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+                      height: 100,
+                      width: 200,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black45),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.grey.shade200,
+                            Colors.grey.shade300,
+                            Colors.grey.shade400,
+                            Colors.grey.shade500,
+                            Colors.grey.shade600,
+                            Colors.grey.shade700,
+                            Colors.grey.shade800,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(
+                  height: 100,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    var request = http.MultipartRequest(
+                      'POST',
+                      Uri.parse(
+                        'https://api.viscandiagnostics.com/v1/signup',
+                      ),
+                    );
+                    request.fields.addAll({
+                      'firstName': 'Super',
+                      'lastName': 'Sardaa',
+                      'speciality': 'doc',
+                      'password': 'Test@123',
+                      'clinicName': 'sdsdsd',
+                      'role': 'doctor',
+                      'doctorContactNo': '6354572252',
+                      'doctorEmailAddress': 'kevin@gmail.com',
+                      'registrationNo': '11554466',
+                      'pan': '2e2232332',
+                      'aadhar': '3232322',
+                      'addressLineOne': '4343434344',
+                      'addressLineTwo': 'dfdffdfd',
+                      'pinCode': '110087'
+                    });
+                    log('pickedFile 0 :- ${pickedFile[0]}');
+                    log('pickedFile 1 :- ${pickedFile[1]}');
+                    log('pickedFile 2 :- ${pickedFile[2]}');
+                    log('pickedFile 3 :- ${pickedFile[3]}');
+                    log('pickedFile 4 :- ${pickedFile[4]}');
+                    request.files.add(await http.MultipartFile.fromPath(
+                        'image', pickedFile[0]));
+                    request.files.add(await http.MultipartFile.fromPath(
+                        'image', pickedFile[1]));
+                    request.files.add(await http.MultipartFile.fromPath(
+                        'image', pickedFile[2]));
+                    request.files.add(await http.MultipartFile.fromPath(
+                        'image', pickedFile[3]));
+                    request.files.add(await http.MultipartFile.fromPath(
+                        'image', pickedFile[4]));
+                    http.StreamedResponse response = await request.send();
+
+                    if (response.statusCode == 200) {
+                      log('SUCCESSFULLY :- ${await response.stream.bytesToString()}');
+                    } else {
+                      log('FAILED : - ${response.reasonPhrase}');
+                    }
+                  },
+                  child: Text('Update'),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
