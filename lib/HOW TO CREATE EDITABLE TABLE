@@ -1,0 +1,108 @@
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class DemoScreen extends StatefulWidget {
+  const DemoScreen({Key? key}) : super(key: key);
+
+  @override
+  State<DemoScreen> createState() => _DemoScreenState();
+}
+
+class _DemoScreenState extends State<DemoScreen> {
+  List<TextEditingController> table = [TextEditingController(text: 'No')];
+  List<TextEditingController> table1 = [TextEditingController(text: '1')];
+  List<TextEditingController> table2 = [TextEditingController(text: '2')];
+  List table00 = [TextEditingController(text: 'No')];
+  List table01 = [TextEditingController(text: '1')];
+  List table02 = [TextEditingController(text: '2')];
+  final titleController = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 400,
+            width: 300,
+            child: Table(
+                border: TableBorder
+                    .all(), // Allows to add a border decoration around your table
+                children: [
+                  buildRow(data: table, enable: false),
+                  buildRow(data: table1),
+                  buildRow(data: table2),
+                ]),
+          ),
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return StatefulBuilder(
+                    builder: (context, setStat) {
+                      return AlertDialog(
+                        title: Column(
+                          children: [
+                            TextField(
+                              controller: titleController,
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                setStat(() {
+                                  table.add(TextEditingController(
+                                      text: titleController.text));
+                                  table1.add(TextEditingController());
+                                  table2.add(TextEditingController());
+                                });
+                                Navigator.pop(context);
+                              },
+                              child: Text('ADD'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+            icon: Icon(Icons.add),
+          ),
+          SizedBox(
+            height: 100,
+          ),
+          IconButton(
+            onPressed: () {
+              table00.clear();
+              table01.clear();
+              table02.clear();
+              for (int i = 0; i < table.length; i++) {
+                table00.add(table[i].text);
+                table01.add(table1[i].text);
+                table02.add(table2[i].text);
+              }
+              log('TABLE :- $table00');
+              log('TABLE1 :- $table01');
+              log('TABLE2 :- $table02');
+            },
+            icon: Icon(Icons.print),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+TableRow buildRow({List? data, bool enable = true}) {
+  return TableRow(
+      children: data!.map((e) {
+    return TextField(
+      textAlign: TextAlign.center,
+      controller: e,
+      enabled: enable == true ? true : false,
+    );
+  }).toList());
+}
