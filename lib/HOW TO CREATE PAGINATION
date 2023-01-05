@@ -1,0 +1,133 @@
+import 'package:flutter/material.dart';
+
+class DemoScreen extends StatefulWidget {
+  const DemoScreen({Key? key}) : super(key: key);
+
+  @override
+  State<DemoScreen> createState() => _DemoScreenState();
+}
+
+class _DemoScreenState extends State<DemoScreen> {
+  ScrollController scrollController = ScrollController();
+
+  List<String> data = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+    '12',
+    '13',
+    '14',
+    '15',
+    '16',
+    '17',
+    '18',
+    '19',
+    '20',
+    '21',
+    '22',
+    '23',
+    '24',
+    '25',
+    '26',
+    '27',
+    '28',
+    '29',
+    '30',
+    '31',
+    '32',
+    '33',
+    '34',
+    '35',
+    '36',
+    '37',
+    '38',
+    '39',
+    '40',
+    '41',
+    '42',
+    '43',
+    '44',
+    '45',
+    '46',
+    '47',
+    '48',
+    '49',
+    '50',
+  ];
+
+  List data1 = [];
+  bool isLoading = false;
+
+  setLeanght() async {
+    isLoading = true;
+    setState(() {});
+    int setLength = 0;
+    if (data.length != data1.length) {
+      if (data.length - data1.length < 10) {
+        setLength = data.length;
+      } else {
+        setLength = data1.length + 10;
+      }
+    } else {
+      setLength = 0;
+    }
+    print('--setLeanght---${setLength}');
+    for (int i = data1.length; i < setLength; i++) {
+      data1.add(data[i]);
+    }
+    await Future.delayed(Duration(seconds: 2));
+    isLoading = false;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    for (int i = 0; i < 10; i++) {
+      data1.add(data[i]);
+    }
+
+    scrollController.addListener(() {
+      print(
+          'Listener===> ${scrollController.position.pixels == scrollController.position.maxScrollExtent}');
+
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        setLeanght();
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.separated(
+                physics: BouncingScrollPhysics(),
+                controller: scrollController,
+                itemBuilder: (context, index) {
+                  return Text('HELLO ${data1[index]}');
+                },
+                separatorBuilder: (context, index) {
+                  return SizedBox(
+                    height: 150,
+                  );
+                },
+                itemCount: data1.length),
+          ),
+          isLoading == true ? CircularProgressIndicator() : SizedBox()
+        ],
+      ),
+    );
+  }
+}
